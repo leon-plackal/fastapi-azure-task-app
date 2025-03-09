@@ -42,6 +42,13 @@ resource "azurerm_subnet" "app" {
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.0.1.0/24"]
   service_endpoints    = ["Microsoft.Sql"]
+  delegation {
+    name = "delegation"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
 }
 
 resource "azurerm_subnet" "function" {
@@ -80,7 +87,7 @@ resource "azurerm_mssql_database" "main" {
   name                = "${var.prefix}-db"
   server_id           = azurerm_mssql_server.main.id
   collation           = "SQL_Latin1_General_CP1_CI_AS"
-  max_size_gb         = 4
+  max_size_gb         = 2
   sku_name            = "Basic"
   tags                = var.tags
 }
@@ -104,8 +111,7 @@ resource "azurerm_service_plan" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   os_type             = "Linux"
-  # free tier
-  sku_name            = "F1"
+  sku_name            = "B1"
   tags                = var.tags
 }
 
@@ -152,22 +158,12 @@ resource "azurerm_storage_account" "function" {
   tags                     = var.tags
 }
 
-# Function App Service Plan
-resource "azurerm_service_plan" "function" {
-  name                = "${var.prefix}-function-plan"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  os_type             = "Linux"
-  sku_name            = "F1"  # Free tier
-  tags                = var.tags
-}
-
 # Function App
 resource "azurerm_linux_function_app" "task_processor" {
   name                       = "${var.prefix}-func-${random_string.suffix.result}"
   resource_group_name        = azurerm_resource_group.main.name
   location                   = azurerm_resource_group.main.location
-  service_plan_id            = azurerm_service_plan.function.id
+  service_plan_id            = azurerm_service_plan.main.id
   storage_account_name       = azurerm_storage_account.function.name
   storage_account_access_key = azurerm_storage_account.function.primary_access_key
   tags                       = var.tags
@@ -193,36 +189,4 @@ resource "azurerm_linux_function_app" "task_processor" {
   }
   
   virtual_network_subnet_id = azurerm_subnet.function.id
-}
-
-# Key Vault for secrets
-resource "azurerm_key_vault" "main" {
-  name                        = "${var.prefix}-kv-${random_string.suffix.result}"
-  location                    = azurerm_resource_group.main.location
-  resource_group_name         = azurerm_resource_group.main.name
-  enabled_for_disk_encryption = true
-  tenant_id                   = var.azure_tenant_id
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = false
-  sku_name                    = "standard"
-  tags                        = var.tags
-  
-  access_policy {
-    tenant_id = var.azure_tenant_id
-    object_id = var.aad_admin_object_id
-    
-    key_permissions = [
-      "Get", "List", "Create", "Delete"
-    ]
-    secret_permissions = [
-      "Get", "List", "Set", "Delete"
-    ]
-  }
-}
-
-# Store secrets in Key Vault
-resource "azurerm_key_vault_secret" "db_connection" {
-  name         = "db-connection-string"
-  value        = "Driver={ODBC Driver 17 for SQL Server};Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.main.name};Uid=${var.sql_admin_username};Pwd=${var.sql_admin_password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-  key_vault_id = azurerm_key_vault.main.id
 }

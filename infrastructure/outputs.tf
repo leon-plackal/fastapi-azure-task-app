@@ -22,8 +22,3 @@ output "sql_database_name" {
   description = "Name of the SQL Database"
   value       = azurerm_mssql_database.main.name
 }
-
-output "key_vault_name" {
-  description = "Name of the Key Vault"
-  value       = azurerm_key_vault.main.name
-}

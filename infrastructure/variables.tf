@@ -12,7 +12,7 @@ variable "prefix" {
 variable "location" {
   description = "Azure region to deploy resources"
   type        = string
-  default     = "East US"
+  default     = "Canada Central"
 }
 
 variable "tags" {
