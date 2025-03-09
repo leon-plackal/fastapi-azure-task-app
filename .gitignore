@@ -1,0 +1,67 @@
+# General Python ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+fastapi_app/venv/
+azure_functions/venv/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# FastAPI specific
+fastapi_app/.env
+fastapi_app/.pytest_cache/
+fastapi_app/.mypy_cache/
+
+# Azure Functions specific
+azure_functions/.env
+azure_functions/.python_packages/
+azure_functions/local.settings.json
+
+# Terraform specific
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+# variables not to be committed
+*.tfvars
+
+# Logs
+logs/
+*.log
+*.out
+*.err
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+pytest_cache/
+
+# Node.js (if Azure Functions uses JavaScript)
+node_modules/
+npm-debug.log
+
+# Docker (if using Docker for FastAPI)
+fastapi_app/Dockerfile
+fastapi_app/.dockerignore
+
+# Ignore any personal or temporary files
+*.bak
+*.tmp
