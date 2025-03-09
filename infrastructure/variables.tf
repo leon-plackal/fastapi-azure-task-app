@@ -37,6 +37,11 @@ variable "sql_admin_password" {
   sensitive   = true
 }
 
+variable "my_ip_address" {
+  description = "Public IP address to allow access to the SQL Server"
+  type        = string
+}
+
 variable "aad_admin_object_id" {
   description = "Object ID of the Azure AD user or group for SQL admin"
   type        = string

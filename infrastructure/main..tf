@@ -82,6 +82,14 @@ resource "azurerm_mssql_server" "main" {
   }
 }
 
+# Add firewall rule to permit my IP address
+resource "azurerm_mssql_firewall_rule" "main" {
+  name              = "AllowLocalIP"
+  server_id         = azurerm_mssql_server.main.id
+  start_ip_address  = var.my_ip_address
+  end_ip_address    = var.my_ip_address
+}
+
 # Azure SQL Database
 resource "azurerm_mssql_database" "main" {
   name                = "${var.prefix}-db"

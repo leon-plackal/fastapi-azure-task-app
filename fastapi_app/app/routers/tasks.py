@@ -40,7 +40,7 @@ def create_task(task: TaskCreate, background_tasks: BackgroundTasks, db: Session
 
 @router.get("/tasks/", response_model=List[TaskResponse])
 def read_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    tasks = db.query(Task).offset(skip).limit(limit).all()
+    tasks = db.query(Task).order_by(Task.created_at).offset(skip).limit(limit).all()
     return tasks
 
 @router.get("/tasks/{task_id}", response_model=TaskResponse)
